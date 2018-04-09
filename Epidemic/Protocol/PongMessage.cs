@@ -1,9 +1,11 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Epidemic.Protocol
 {
+    [MessagePackObject]
     public class PongMessage
     {
         public PongMessage(Guid nodeId)
@@ -11,6 +13,7 @@ namespace Epidemic.Protocol
             NodeId = nodeId;
         }
 
+        [Key(0)]
         public Guid NodeId { get; }
     }
 }
