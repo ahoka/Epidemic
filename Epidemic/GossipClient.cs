@@ -16,7 +16,7 @@ namespace Epidemic
         private Bootstrap bootstrap;
         private MultithreadEventLoopGroup group;
 
-        public GossipClient(MessageHandler messageHandler)
+        public GossipClient(GossipHandler messageHandler)
         {
             group = new MultithreadEventLoopGroup();
 
@@ -28,23 +28,27 @@ namespace Epidemic
             bootstrap = new Bootstrap()
                 .Group(group)
                 .Channel<SocketDatagramChannel>()
-                .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+                .Option(ChannelOption.SoBroadcast, true)
+                .Handler(new ActionChannelInitializer<IChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
 
-                    pipeline.AddLast(new LoggingHandler("Incoming-Connect"));
-
-                    pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(4));
-                    pipeline.AddLast("Client Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
+                    //pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(4));
+                    //pipeline.AddLast("Client Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
                     pipeline.AddLast("Client Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast("Client Payload Decoder", new MessagePackDecoder());
                     pipeline.AddLast("Client Message Handler", messageHandler);
                 }));
         }
 
-        public async Task<IChannel> Bind(Uri uri)
+        public async Task<IChannel> BindAsync(int port)
         {
-            return await bootstrap.BindAsync(IPAddress.Parse(uri.DnsSafeHost), uri.Port);
+            return await bootstrap.BindAsync(IPAddress.Any, port);
+        }
+
+        public async Task<IChannel> Connect(Uri uri)
+        {
+            return await bootstrap.ConnectAsync(uri.Host, uri.Port);
         }
 
         public void Dispose()

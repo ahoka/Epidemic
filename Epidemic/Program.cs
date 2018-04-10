@@ -21,7 +21,8 @@ namespace Epidemic
             Console.WriteLine("Hello World!");
 
             Log.Logger = new LoggerConfiguration()
-                //.MinimumLevel.Debug()
+                .MinimumLevel.Debug()
+                .Enrich.WithDemystifiedStackTraces()
                 .WriteTo.Async(l => l.Console())
                 .CreateLogger();
 
@@ -40,9 +41,10 @@ namespace Epidemic
                     using (var server = scope.ServiceProvider.GetRequiredService<GossipServer>())
                     using (var client = scope.ServiceProvider.GetRequiredService<GossipClient>())
                     {
-                        await server.BindAsync();
+                        await server.BindAsync(4010);
 
-                        var channel = await client.Bind(new Uri("tcp://0.0.0.0:4011"));
+                        //var channel = await client.BindAsync(4011);
+                        var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
 
                         await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
 
@@ -53,7 +55,8 @@ namespace Epidemic
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Exception: {ex}");
+                    Log.Fatal(ex, "Program error");
+                    Log.CloseAndFlush();
                 }
             }
         }

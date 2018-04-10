@@ -8,6 +8,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,41 +16,38 @@ namespace Epidemic
 {
     public class GossipServer : IDisposable
     {
-        private ServerBootstrap bootstrap;
+        private Bootstrap bootstrap;
         private MultithreadEventLoopGroup group;
         private IChannel boundChannel;
 
-        public GossipServer(MessageHandler messageHandler)
+        public GossipServer(GossipHandler messageHandler)
         {
-            group = new MultithreadEventLoopGroup(1);
+            group = new MultithreadEventLoopGroup();
 
             // Protocol:
             // --------------------------------
             // | len: 4 | messagepack payload |
             // --------------------------------
 
-            bootstrap = new ServerBootstrap()
+            bootstrap = new Bootstrap()
                 .Group(group)
-                .Channel<TcpServerSocketChannel>()
-                .Option(ChannelOption.SoBacklog, 100)
-                .Handler(new LoggingHandler("Incoming-Listener"))
-                .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+                .Channel<SocketDatagramChannel>()
+                .Option(ChannelOption.SoBroadcast, true)
+                .Handler(new ActionChannelInitializer<IChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
 
-                    pipeline.AddLast(new LoggingHandler("Incoming-Connect"));
-
-                    pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(4));
+                    //pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
+                    //pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(4));
                     pipeline.AddLast("Server Payload Decoder", new MessagePackDecoder());
                     pipeline.AddLast("Server Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast("Server Message Handler", messageHandler);
                 }));
         }
 
-        public async Task BindAsync()
+        public async Task BindAsync(int port)
         {
-            boundChannel = await bootstrap.BindAsync(4010);
+            boundChannel = await bootstrap.BindAsync(IPAddress.Any, port);
         }
 
         public void Dispose()
