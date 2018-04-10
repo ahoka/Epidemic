@@ -33,16 +33,16 @@ namespace Epidemic
             //services.AddSingleton<ProtocolServer>();
             //services.AddSingleton<MessageHandler>();
 
-            using (var serviceProvider = services.BuildServiceProvider())
+            using (var scope = services.BuildServiceProvider().CreateScope())
             {
                 try
                 {
-                    using (var server = serviceProvider.GetRequiredService<ProtocolServer>())
-                    using (var client = serviceProvider.GetRequiredService<ProtocolClient>())
+                    using (var server = scope.ServiceProvider.GetRequiredService<GossipServer>())
+                    using (var client = scope.ServiceProvider.GetRequiredService<GossipClient>())
                     {
                         await server.BindAsync();
 
-                        var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
+                        var channel = await client.Bind(new Uri("tcp://0.0.0.0:4011"));
 
                         await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
 
