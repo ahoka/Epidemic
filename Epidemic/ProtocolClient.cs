@@ -16,7 +16,7 @@ namespace Epidemic
         private Bootstrap bootstrap;
         private MultithreadEventLoopGroup group;
 
-        public ProtocolClient()
+        public ProtocolClient(MessageHandler messageHandler)
         {
             group = new MultithreadEventLoopGroup();
 
@@ -40,7 +40,7 @@ namespace Epidemic
                     pipeline.AddLast(new MessagePackDecoder());
                     pipeline.AddLast(new MessagePackEncoder());
 
-                    pipeline.AddLast(new MessageHandler());
+                    pipeline.AddLast(messageHandler);
                 }));
         }
 

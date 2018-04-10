@@ -3,6 +3,7 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Scrutor;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Epidemic
         private MultithreadEventLoopGroup workerGroup;
         private IChannel boundChannel;
 
-        public ProtocolServer()
+        public ProtocolServer(MessageHandler messageHandler)
         {
             bossGroup = new MultithreadEventLoopGroup(1);
             workerGroup = new MultithreadEventLoopGroup();
@@ -44,7 +45,7 @@ namespace Epidemic
                     pipeline.AddLast(new MessagePackDecoder());
                     pipeline.AddLast(new MessagePackEncoder());
 
-                    pipeline.AddLast(new MessageHandler());
+                    pipeline.AddLast(messageHandler);
                 }));
         }
 

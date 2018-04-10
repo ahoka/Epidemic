@@ -6,6 +6,9 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Epidemic.Protocol;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Core;
 
 namespace Epidemic
 {
@@ -15,26 +18,37 @@ namespace Epidemic
         {
             Console.WriteLine("Hello World!");
 
-            try
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
+
+            var services = new ServiceCollection();
+
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.Scan(scan => scan.FromEntryAssembly().AddClasses().AsSelf().AsImplementedInterfaces());
+            //services.AddSingleton<ProtocolServer>();
+            //services.AddSingleton<MessageHandler>();
+
+            using (var serviceProvider = services.BuildServiceProvider())
             {
-                using (var server = new ProtocolServer())
-                using (var client = new ProtocolClient())
+                try
                 {
-                    await server.BindAsync();
+                    using (var server = serviceProvider.GetRequiredService<ProtocolServer>())
+                    using (var client = serviceProvider.GetRequiredService<ProtocolClient>())
+                    {
+                        await server.BindAsync();
 
-                    Console.ReadKey();
+                        var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
 
-                    var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
-
-                    await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
-                    await channel.DisconnectAsync();
-
-                    Console.ReadLine();
+                        await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
+                        await channel.DisconnectAsync();
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception: {ex.Message}");
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception: {ex}");
+                }
             }
         }
     }
