@@ -11,17 +11,21 @@ namespace Epidemic
     public class MessageHandler : SimpleChannelInboundHandler<IProtocolMessage>
     {
         private ILogger<MessageHandler> log;
+        private Cluster cluster;
         private Guid nodeId;
 
-        public MessageHandler(ILogger<MessageHandler> log)
+        public MessageHandler(ILogger<MessageHandler> log, Cluster cluster)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
             this.nodeId = Guid.NewGuid();
+            this.cluster = cluster;
         }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IProtocolMessage msg)
         {
             Log.Debug(ctx.Name);
+
+            Log.Information($"Message from: {ctx.Channel.RemoteAddress}");
 
             switch (msg)
             {
