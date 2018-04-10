@@ -16,9 +16,9 @@ namespace Epidemic
         {
             Log.Debug(context.Name);
 
-            var binary = MessagePackSerializer.Serialize(message);
-            var buffer = context.Allocator.Buffer(binary.Length);
-            buffer.WriteBytes(binary);
+            var binary = MessagePackSerializer.SerializeUnsafe(message);
+            var buffer = context.Allocator.Buffer(binary.Count);
+            buffer.WriteBytes(binary.Array, binary.Offset, binary.Count);
 
             output.Add(buffer);
         }
