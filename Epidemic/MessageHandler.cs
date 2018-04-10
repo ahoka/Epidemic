@@ -1,6 +1,7 @@
 ﻿using DotNetty.Transport.Channels;
 using Epidemic.Protocol;
 using Scrutor;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,6 +21,8 @@ namespace Epidemic
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IProtocolMessage msg)
         {
+            Log.Debug(ctx.Name);
+
             switch (msg)
             {
                 case PingMessage ping:

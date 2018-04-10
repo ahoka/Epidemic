@@ -19,6 +19,7 @@ namespace Epidemic
             Console.WriteLine("Hello World!");
 
             Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
 

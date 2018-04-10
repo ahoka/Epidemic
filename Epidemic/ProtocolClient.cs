@@ -34,13 +34,11 @@ namespace Epidemic
 
                     pipeline.AddLast(new LoggingHandler("Incoming-Connect"));
 
-                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    pipeline.AddLast(new LengthFieldPrepender(4));
-
-                    pipeline.AddLast(new MessagePackDecoder());
-                    pipeline.AddLast(new MessagePackEncoder());
-
-                    pipeline.AddLast(messageHandler);
+                    pipeline.AddLast("Client Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
+                    pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(4));
+                    pipeline.AddLast("Client Payload Decoder", new MessagePackDecoder());
+                    pipeline.AddLast("Client Payload Encoder", new MessagePackEncoder());
+                    pipeline.AddLast("Client Message Handler", messageHandler);
                 }));
         }
 
