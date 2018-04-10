@@ -43,6 +43,9 @@ namespace Epidemic
                         var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
 
                         await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
+
+                        Console.ReadKey();
+
                         await channel.DisconnectAsync();
                     }
                 }

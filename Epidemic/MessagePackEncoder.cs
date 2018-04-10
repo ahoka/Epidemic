@@ -10,15 +10,17 @@ using System.Text;
 
 namespace Epidemic
 {
-    class MessagePackEncoder : MessageToByteEncoder<IProtocolMessage>
+    class MessagePackEncoder : MessageToMessageEncoder<IProtocolMessage>
     {
-        protected override void Encode(IChannelHandlerContext context, IProtocolMessage message, IByteBuffer output)
+        protected override void Encode(IChannelHandlerContext context, IProtocolMessage message, List<object> output)
         {
             Log.Debug(context.Name);
 
             var binary = MessagePackSerializer.Serialize(message);
+            var buffer = context.Allocator.Buffer(binary.Length);
+            buffer.WriteBytes(binary);
 
-            output.WriteBytes(binary);
+            output.Add(buffer);
         }
     }
 }

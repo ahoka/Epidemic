@@ -6,7 +6,7 @@ using System.Text;
 namespace Epidemic.Protocol
 {
     [MessagePackObject]
-    public class PongMessage
+    public class PongMessage : IProtocolMessage
     {
         public PongMessage(Guid nodeId)
         {
