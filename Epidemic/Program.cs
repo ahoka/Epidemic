@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNetty.Codecs;
 using DotNetty.Handlers.Logging;
@@ -19,8 +21,8 @@ namespace Epidemic
             Console.WriteLine("Hello World!");
 
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
+                //.MinimumLevel.Debug()
+                .WriteTo.Async(l => l.Console())
                 .CreateLogger();
 
             var services = new ServiceCollection();
@@ -44,7 +46,7 @@ namespace Epidemic
 
                         await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
 
-                        Console.ReadKey();
+                        Console.ReadLine();
 
                         await channel.DisconnectAsync();
                     }
