@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetty.Codecs" Version="0.4.7" />
     <PackageReference Include="DotNetty.Handlers" Version="0.4.7" />
+    <PackageReference Include="LanguageExt.Core" Version="2.1.32" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Scrutor" Version="2.2.2" />

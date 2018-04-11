@@ -1,4 +1,5 @@
 ﻿using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Epidemic.Protocol;
 using Scrutor;
 using Serilog;
@@ -11,14 +12,12 @@ namespace Epidemic
     public class GossipHandler : SimpleChannelInboundHandler<IProtocolMessage>
     {
         private ILogger<MessageHandler> log;
-        private Cluster cluster;
-        private Guid nodeId;
+        private GossipBehavior behavior;
 
-        public GossipHandler(ILogger<MessageHandler> log, Cluster cluster)
+        public GossipHandler(ILogger<MessageHandler> log, GossipBehavior behavior)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
-            this.nodeId = Guid.NewGuid();
-            this.cluster = cluster;
+            this.behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
         }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IProtocolMessage msg)
@@ -27,19 +26,8 @@ namespace Epidemic
 
             Log.Information($"Message from: {ctx.Channel.RemoteAddress}");
 
-            switch (msg)
-            {
-                case PingMessage ping:
-                    log.Information($"Ping from {ping.NodeId}");
-                    ctx.WriteAndFlushAsync(new PongMessage(nodeId)).Wait();
-                    break;
-                case PongMessage pong:
-                    log.Information($"Pong from {pong.NodeId}");
-                    break;
-                default:
-                    log.Warning("Unknown protocol message!");
-                    break;
-            }
+            ctx.WriteAndFlushAsync().Wait();
+
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)

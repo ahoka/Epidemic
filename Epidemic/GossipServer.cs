@@ -3,6 +3,7 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Epidemic.Protocol;
 using Scrutor;
 using Serilog;
 using System;
@@ -39,8 +40,8 @@ namespace Epidemic
 
                     //pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
                     //pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(4));
-                    pipeline.AddLast("Server Payload Decoder", new MessagePackDecoder());
-                    pipeline.AddLast("Server Payload Encoder", new MessagePackEncoder());
+                    pipeline.AddLast("Server Payload Decoder", new DatagramPacketDecoder(new MessagePackDecoder()));
+                    pipeline.AddLast("Server Payload Encoder", new DatagramPacketEncoder<IProtocolMessage>(new MessagePackEncoder()));
                     pipeline.AddLast("Server Message Handler", messageHandler);
                 }));
         }

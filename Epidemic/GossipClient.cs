@@ -3,6 +3,7 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Epidemic.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -35,8 +36,8 @@ namespace Epidemic
 
                     //pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(4));
                     //pipeline.AddLast("Client Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    pipeline.AddLast("Client Payload Encoder", new MessagePackEncoder());
-                    pipeline.AddLast("Client Payload Decoder", new MessagePackDecoder());
+                    pipeline.AddLast("Client Payload Encoder", new DatagramPacketEncoder<IProtocolMessage>(new MessagePackEncoder()));
+                    pipeline.AddLast("Client Payload Decoder", new DatagramPacketDecoder(new MessagePackDecoder()));
                     pipeline.AddLast("Client Message Handler", messageHandler);
                 }));
         }

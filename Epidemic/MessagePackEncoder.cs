@@ -1,6 +1,7 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Epidemic.Protocol;
 using MessagePack;
 using Serilog;

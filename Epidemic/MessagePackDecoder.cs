@@ -31,5 +31,10 @@ namespace Epidemic
                 }
             }
         }
+
+        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+        {
+            Log.Warning(exception, "Invalid protocol message received");
+        }
     }
 }

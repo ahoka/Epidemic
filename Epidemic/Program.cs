@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
@@ -45,8 +48,12 @@ namespace Epidemic
 
                         //var channel = await client.BindAsync(4011);
                         var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
-
-                        await channel.WriteAndFlushAsync(new PingMessage(Guid.NewGuid()));
+                        var message = new DefaultAddressedEnvelope<IProtocolMessage>(new PingMessage(Guid.NewGuid()), new IPEndPoint(IPAddress.Loopback, 4010));
+                        await channel.WriteAndFlushAsync(message);
+                        //var message = Encoding.UTF8.GetBytes("HELLO");
+                        //var buf = Unpooled.WrappedBuffer(message);
+                        //var datagram = new DatagramPacket(buf, new IPEndPoint(IPAddress.Loopback, 4010));
+                        //await channel.WriteAndFlushAsync(datagram);
 
                         Console.ReadLine();
 
