@@ -3,14 +3,21 @@ using LanguageExt;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static LanguageExt.Prelude;
 
 namespace Epidemic
 {
     public class GossipBehavior
     {
-        private Cluster cluster;
-        private Guid nodeId;
-        private ILogger<GossipBehavior> log;
+        private readonly Cluster cluster;
+        private readonly Guid nodeId = Guid.NewGuid();
+        private readonly ILogger<GossipBehavior> log;
+
+        public GossipBehavior(Cluster cluster, ILogger<GossipBehavior> log)
+        {
+            this.cluster = cluster ?? throw new ArgumentNullException(nameof(cluster));
+            this.log = log ?? throw new ArgumentNullException(nameof(log));
+        }
 
         public Option<IProtocolMessage> Behavior(IProtocolMessage message)
         {
@@ -22,10 +29,9 @@ namespace Epidemic
                 case PongMessage pong:
                     log.Information($"Pong from {pong.NodeId}");
                     return None;
-                    break;
                 default:
                     log.Warning("Unknown protocol message!");
-                    break;
+                    return None;
             }
         }
     }

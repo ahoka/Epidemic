@@ -19,7 +19,7 @@ namespace Epidemic
         {
             if (Nodes.TryGetValue(nodeId, out var node))
             {
-                if (node.Address != node.Address)
+                if (node.Address != remoteAddress)
                 {
                     Log.Warning($"Address changed for node {nodeId}: {node.Address} => {remoteAddress}");
                 }

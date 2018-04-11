@@ -11,17 +11,17 @@ using System.Text;
 
 namespace Epidemic
 {
-    class MessagePackEncoder : MessageToMessageEncoder<IProtocolMessage>
+    class MessagePackEncoder : MessageToMessageEncoder<IAddressedEnvelope<IProtocolMessage>>
     {
-        protected override void Encode(IChannelHandlerContext context, IProtocolMessage message, List<object> output)
+        protected override void Encode(IChannelHandlerContext context, IAddressedEnvelope<IProtocolMessage> message, List<object> output)
         {
             Log.Debug(context.Name);
 
-            var binary = MessagePackSerializer.SerializeUnsafe(message);
+            var binary = MessagePackSerializer.SerializeUnsafe(message.Content);
             var buffer = context.Allocator.Buffer(binary.Count);
             buffer.WriteBytes(binary.Array, binary.Offset, binary.Count);
 
-            output.Add(buffer);
+            output.Add(new DefaultAddressedEnvelope<IByteBuffer>(buffer, message.Recipient, message.Recipient));
         }
     }
 }

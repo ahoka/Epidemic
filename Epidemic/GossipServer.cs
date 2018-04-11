@@ -27,7 +27,7 @@ namespace Epidemic
 
             // Protocol:
             // --------------------------------
-            // | len: 4 | messagepack payload |
+            // | len: 2 | messagepack payload |
             // --------------------------------
 
             bootstrap = new Bootstrap()
@@ -38,10 +38,10 @@ namespace Epidemic
                 {
                     var pipeline = channel.Pipeline;
 
-                    //pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    //pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(4));
-                    pipeline.AddLast("Server Payload Decoder", new DatagramPacketDecoder(new MessagePackDecoder()));
-                    pipeline.AddLast("Server Payload Encoder", new DatagramPacketEncoder<IProtocolMessage>(new MessagePackEncoder()));
+                    pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
+                    pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(2));
+                    pipeline.AddLast("Server Payload Decoder", new MessagePackDecoder());
+                    pipeline.AddLast("Server Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast("Server Message Handler", messageHandler);
                 }));
         }
