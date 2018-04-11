@@ -1,6 +1,7 @@
 ﻿using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Epidemic.Protocol;
+using LanguageExt;
 using LanguageExt.TypeClasses;
 using Scrutor;
 using Serilog;
@@ -31,13 +32,15 @@ namespace Epidemic
 
             var response = behavior.Behavior(msg.Content);
 
-            var sender = Optional(msg.Sender as IPEndPoint)
+            var sender = Try(msg.Sender as IPEndPoint ?? throw new InvalidOperationException("Sender is not an IP Endpoint"))
                 .Select(ep => ep.Address)
                 .Select(addr => new IPEndPoint(addr, 4010));
 
-            var _ = from m in response
-            from s in sender
+            var write = from m in response.ToTryOption()
+            from s in sender.ToTryOption()
             select ctx.WriteAsync(new DefaultAddressedEnvelope<IProtocolMessage>(m, s));
+
+            write.ToTry().Match(_ => unit, e => ignore(ctx.FireExceptionCaught(e)));
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)
