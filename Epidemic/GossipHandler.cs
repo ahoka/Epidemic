@@ -32,9 +32,10 @@ namespace Epidemic
 
             var response = behavior.Behavior(msg.Content);
 
-            Log.Debug($"Sending Datagram: {ctx.Channel.LocalAddress} => {msg.Sender}");
+            Log.Debug($"Sending Datagram: {response} {ctx.Channel.LocalAddress} => {msg.Sender}");
 
-            response.Some(m => ctx.WriteAsync(new DefaultAddressedEnvelope<IProtocolMessage>(m, msg.Sender)));
+            response.Match(m => ignore(ctx.WriteAsync(new DefaultAddressedEnvelope<IProtocolMessage>(m, msg.Sender))),
+                           () => unit);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)

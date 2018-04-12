@@ -15,14 +15,16 @@ using System.Threading.Tasks;
 
 namespace Epidemic
 {
-    public class GossipServer : IDisposable
+    public class GossipServer : IGossipServer
     {
         private Bootstrap bootstrap;
         private MultithreadEventLoopGroup group;
-        private IChannel boundChannel;
 
-        public GossipServer(GossipHandler messageHandler)
+        public string Name { get; }
+
+        public GossipServer(string name, GossipHandler messageHandler)
         {
+            Name = name;
             group = new MultithreadEventLoopGroup();
 
             // Protocol:
@@ -38,32 +40,23 @@ namespace Epidemic
                 {
                     var pipeline = channel.Pipeline;
 
-                    pipeline.AddLast("Server Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    pipeline.AddLast("Server Frame Encoder", new LengthFieldPrepender(2));
-                    pipeline.AddLast("Server Payload Decoder", new MessagePackDecoder());
-                    pipeline.AddLast("Server Payload Encoder", new MessagePackEncoder());
-                    pipeline.AddLast("Server Message Handler", messageHandler);
+                    pipeline.AddLast($"{Name} Logger", new SerilogLoggingHandler());
+                    //pipeline.AddLast($"{Name} Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
+                    //pipeline.AddLast($"{Name} Frame Encoder", new LengthFieldPrepender(2));
+                    pipeline.AddLast($"{Name} Payload Decoder", new MessagePackDecoder());
+                    pipeline.AddLast($"{Name} Payload Encoder", new MessagePackEncoder());
+                    pipeline.AddLast($"{Name} Message Handler", messageHandler);
                 }));
         }
 
-        public async Task BindAsync(int port)
+        public async Task<IChannel> BindAsync(int port)
         {
-            boundChannel = await bootstrap.BindAsync(IPAddress.Any, port);
+            return await bootstrap.BindAsync(IPAddress.Any, port);
         }
 
         public void Dispose()
         {
-            try
-            {
-                if (boundChannel != null)
-                {
-                    boundChannel.CloseAsync().Wait();
-                }
-            }
-            finally
-            {
-                group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
-            }
+            group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
         }
     }
 }

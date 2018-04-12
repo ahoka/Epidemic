@@ -11,9 +11,9 @@ using System.Text;
 
 namespace Epidemic
 {
-    public class MessagePackDecoder : MessageToMessageDecoder<DatagramPacket>
+    public class MessagePackDecoder : MessageToMessageDecoder<IAddressedEnvelope<IByteBuffer>>
     {
-        protected override void Decode(IChannelHandlerContext context, DatagramPacket message, List<object> output)
+        protected override void Decode(IChannelHandlerContext context, IAddressedEnvelope<IByteBuffer> message, List<object> output)
         {
             Log.Debug(context.Name);
             var input = message.Content;

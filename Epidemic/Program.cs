@@ -33,29 +33,35 @@ namespace Epidemic
 
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-            services.Scan(scan => scan.FromEntryAssembly().AddClasses().AsSelf().AsImplementedInterfaces());
-            //services.AddSingleton<ProtocolServer>();
-            //services.AddSingleton<MessageHandler>();
+            //services.Scan(scan => scan.FromEntryAssembly().AddClasses().AsSelf().AsImplementedInterfaces());
+            services.AddSingleton<GossipServerFactory>();
+            services.AddTransient<GossipHandler>();
+            services.AddTransient<GossipBehavior>();
+            services.AddTransient<Cluster>();
 
             using (var scope = services.BuildServiceProvider().CreateScope())
             {
                 try
                 {
-                    using (var server = scope.ServiceProvider.GetRequiredService<GossipServer>())
-                    using (var client = scope.ServiceProvider.GetRequiredService<GossipClient>())
-                    {
-                        await server.BindAsync(4010);
+                    var serverFactory = scope.ServiceProvider.GetRequiredService<GossipServerFactory>();
 
-                        var channel = await client.BindAsync(4011);
+                    using (var server = serverFactory.Create("Server"))
+                    using (var client = serverFactory.Create("Client"))
+                    {
+                        var serverChannel = await server.BindAsync(4010);
+
+                        var clientChannel = await client.BindAsync(4011);
                         //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
                         var message = new DefaultAddressedEnvelope<IProtocolMessage>(new PingMessage(Guid.NewGuid()), new IPEndPoint(IPAddress.Loopback, 4010));
-                        await channel.WriteAndFlushAsync(message);
+                        await clientChannel.WriteAndFlushAsync(message);
                         //var message = Encoding.UTF8.GetBytes("HELLO");
                         //var buf = Unpooled.WrappedBuffer(message);
                         //var datagram = new DatagramPacket(buf, new IPEndPoint(IPAddress.Loopback, 4010));
                         //await channel.WriteAndFlushAsync(datagram);
 
                         Console.ReadLine();
+                        await clientChannel.DisconnectAsync();
+                        await serverChannel.DisconnectAsync();
                     }
                 }
                 catch (Exception ex)
