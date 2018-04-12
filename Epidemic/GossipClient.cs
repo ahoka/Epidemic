@@ -34,10 +34,10 @@ namespace Epidemic
                 {
                     var pipeline = channel.Pipeline;
 
-                    pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(2));
                     pipeline.AddLast("Client Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    pipeline.AddLast("Client Payload Encoder", new MessagePackEncoder());
+                    pipeline.AddLast("Client Frame Encoder", new LengthFieldPrepender(2));
                     pipeline.AddLast("Client Payload Decoder", new MessagePackDecoder());
+                    pipeline.AddLast("Client Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast("Client Message Handler", messageHandler);
                 }));
         }
@@ -45,11 +45,6 @@ namespace Epidemic
         public async Task<IChannel> BindAsync(int port)
         {
             return await bootstrap.BindAsync(IPAddress.Any, port);
-        }
-
-        public async Task<IChannel> Connect(Uri uri)
-        {
-            return await bootstrap.ConnectAsync(uri.Host, uri.Port);
         }
 
         public void Dispose()

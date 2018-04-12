@@ -46,8 +46,8 @@ namespace Epidemic
                     {
                         await server.BindAsync(4010);
 
-                        //var channel = await client.BindAsync(4011);
-                        var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
+                        var channel = await client.BindAsync(4011);
+                        //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
                         var message = new DefaultAddressedEnvelope<IProtocolMessage>(new PingMessage(Guid.NewGuid()), new IPEndPoint(IPAddress.Loopback, 4010));
                         await channel.WriteAndFlushAsync(message);
                         //var message = Encoding.UTF8.GetBytes("HELLO");
@@ -56,8 +56,6 @@ namespace Epidemic
                         //await channel.WriteAndFlushAsync(datagram);
 
                         Console.ReadLine();
-
-                        await channel.DisconnectAsync();
                     }
                 }
                 catch (Exception ex)

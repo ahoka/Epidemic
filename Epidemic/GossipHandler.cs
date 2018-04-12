@@ -32,15 +32,9 @@ namespace Epidemic
 
             var response = behavior.Behavior(msg.Content);
 
-            var sender = Try(msg.Sender as IPEndPoint ?? throw new InvalidOperationException("Sender is not an IP Endpoint"))
-                .Select(ep => ep.Address)
-                .Select(addr => new IPEndPoint(addr, 4010));
+            Log.Debug($"Sending Datagram: {ctx.Channel.LocalAddress} => {msg.Sender}");
 
-            var write = from m in response.ToTryOption()
-            from s in sender.ToTryOption()
-            select ctx.WriteAsync(new DefaultAddressedEnvelope<IProtocolMessage>(m, s));
-
-            write.ToTry().Match(_ => unit, e => ignore(ctx.FireExceptionCaught(e)));
+            response.Some(m => ctx.WriteAsync(new DefaultAddressedEnvelope<IProtocolMessage>(m, msg.Sender)));
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)
