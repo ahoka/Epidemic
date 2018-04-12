@@ -11,9 +11,9 @@ using System.Text;
 
 namespace Epidemic
 {
-    class MessagePackEncoder : MessageToMessageEncoder<IAddressedEnvelope<IProtocolMessage>>
+    class MessagePackEncoder : MessageToMessageEncoder<IAddressedEnvelope<ProtocolMessage>>
     {
-        protected override void Encode(IChannelHandlerContext context, IAddressedEnvelope<IProtocolMessage> message, List<object> output)
+        protected override void Encode(IChannelHandlerContext context, IAddressedEnvelope<ProtocolMessage> message, List<object> output)
         {
             Log.Debug(context.Name);
 

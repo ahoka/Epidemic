@@ -52,7 +52,8 @@ namespace Epidemic
 
                         var clientChannel = await client.BindAsync(4011);
                         //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
-                        var message = new DefaultAddressedEnvelope<IProtocolMessage>(new PingMessage(Guid.NewGuid()), new IPEndPoint(IPAddress.Loopback, 4010));
+                        var message = new DefaultAddressedEnvelope<ProtocolMessage>(new PingMessage(Enumerable.Empty<Node>(), new Node(Guid.NewGuid(), new Uri("udp://127.0.0.1:4011"))),
+                            new IPEndPoint(IPAddress.Loopback, 4010));
                         await clientChannel.WriteAndFlushAsync(message);
                         //var message = Encoding.UTF8.GetBytes("HELLO");
                         //var buf = Unpooled.WrappedBuffer(message);

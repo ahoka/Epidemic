@@ -8,11 +8,11 @@ namespace Epidemic
 {
     public class Cluster
     {
-        public Dictionary<Guid, Node> Nodes { get; }
+        public Dictionary<Guid, NodeInfo> Nodes { get; }
 
         public Cluster()
         {
-            Nodes = new Dictionary<Guid, Node>();
+            Nodes = new Dictionary<Guid, NodeInfo>();
         }
 
         public void HandlePong(IPAddress remoteAddress, Guid nodeId)
@@ -29,7 +29,7 @@ namespace Epidemic
             }
             else
             {
-                Nodes.Add(nodeId, new Node()
+                Nodes.Add(nodeId, new NodeInfo()
                 {
                     Id = nodeId,
                     Address = remoteAddress,

@@ -7,14 +7,11 @@ using System.Text;
 namespace Epidemic.Protocol
 {
     [MessagePackObject]
-    public class PingMessage : IProtocolMessage
+    public class PingMessage : ProtocolMessage
     {
-        public PingMessage(Guid nodeId)
+        public PingMessage(IEnumerable<Node> members, Node sender)
+            : base(members, sender)
         {
-            NodeId = nodeId;
         }
-
-        [Key(0)]
-        public Guid NodeId { get; }
     }
 }

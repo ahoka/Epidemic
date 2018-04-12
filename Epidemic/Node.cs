@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Epidemic
 {
-    public class Node
+    public class NodeInfo
     {
         public Guid Id { get; set; }
         public IPAddress Address {get;set;}

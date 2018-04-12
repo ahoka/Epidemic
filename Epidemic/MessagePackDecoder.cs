@@ -20,21 +20,21 @@ namespace Epidemic
 
             if (input.ReadableBytes > 0)
             {
-                IProtocolMessage protocolMessage;
+                ProtocolMessage protocolMessage;
 
                 if (input.HasArray)
                 {
                     var segment = new ArraySegment<byte>(input.Array, input.ArrayOffset + input.ReaderIndex, input.ReadableBytes);
-                    protocolMessage = MessagePackSerializer.Deserialize<IProtocolMessage>(segment);
+                    protocolMessage = MessagePackSerializer.Deserialize<ProtocolMessage>(segment);
                 }
                 else
                 {
                     var buf = new byte[input.ReadableBytes];
                     input.ReadBytes(buf);
-                    protocolMessage = MessagePackSerializer.Deserialize<IProtocolMessage>(buf);
+                    protocolMessage = MessagePackSerializer.Deserialize<ProtocolMessage>(buf);
                 }
 
-                output.Add(new DefaultAddressedEnvelope<IProtocolMessage>(protocolMessage, message.Sender, message.Recipient));
+                output.Add(new DefaultAddressedEnvelope<ProtocolMessage>(protocolMessage, message.Sender, message.Recipient));
             }
         }
 
