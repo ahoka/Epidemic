@@ -8,13 +8,13 @@ namespace Epidemic.Protocol
     [MessagePackObject]
     public class PingReqMessage : ProtocolMessage
     {
-        public PingReqMessage(IEnumerable<Node> members, Node sender, Node target)
+        public PingReqMessage(IEnumerable<NodeMessage> members, NodeMessage sender, NodeMessage target)
             : base(members, sender)
         {
             Target = target;
         }
 
         [Key(2)]
-        public Node Target { get; }
+        public NodeMessage Target { get; }
     }
 }

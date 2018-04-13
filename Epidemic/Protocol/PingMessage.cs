@@ -9,7 +9,7 @@ namespace Epidemic.Protocol
     [MessagePackObject]
     public class PingMessage : ProtocolMessage
     {
-        public PingMessage(IEnumerable<Node> members, Node sender)
+        public PingMessage(IEnumerable<NodeMessage> members, NodeMessage sender)
             : base(members, sender)
         {
         }

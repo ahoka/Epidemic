@@ -1,4 +1,5 @@
 ﻿using Epidemic.Protocol;
+using Epidemic.State;
 using LanguageExt;
 using System;
 using System.Collections.Generic;
@@ -6,12 +7,12 @@ using System.Linq;
 using System.Text;
 using static LanguageExt.Prelude;
 
-namespace Epidemic
+namespace Epidemic.Behavior
 {
     public class GossipBehavior
     {
         private readonly Cluster cluster;
-        private readonly Node nodeId = new Node(Guid.NewGuid(), new Uri("udp://127.0.0.1:4010"));
+        private readonly NodeMessage nodeId = new NodeMessage(Guid.NewGuid(), new Uri("udp://127.0.0.1:4010"));
         private readonly ILogger<GossipBehavior> log;
 
         public GossipBehavior(Cluster cluster, ILogger<GossipBehavior> log)
@@ -27,7 +28,8 @@ namespace Epidemic
 
         public Option<ProtocolMessage> Behavior(ProtocolMessage message)
         {
-            var members = Members(cluster).Select(n => new Node(n.Id, new Uri($"udp://{n.Address}")));
+            var members = Members(cluster)
+                .Select(n => new NodeMessage(n.Reference.Id, n.Reference.Address));
 
             switch (message)
             {

@@ -9,16 +9,16 @@ namespace Epidemic.Protocol
     [MessagePack.Union(2, typeof(PingReqMessage))]
     public abstract class ProtocolMessage
     {
-        protected ProtocolMessage(IEnumerable<Node> members, Node sender)
+        protected ProtocolMessage(IEnumerable<NodeMessage> members, NodeMessage sender)
         {
             Members = members ?? throw new System.ArgumentNullException(nameof(members));
             Sender = sender ?? throw new System.ArgumentNullException(nameof(sender));
         }
 
         [Key(0)]
-        public IEnumerable<Node> Members { get; }
+        public IEnumerable<NodeMessage> Members { get; }
 
         [Key(1)]
-        public Node Sender { get; }
+        public NodeMessage Sender { get; }
     }
 }

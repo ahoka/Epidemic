@@ -1,5 +1,6 @@
 ﻿using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Epidemic.Behavior;
 using Epidemic.Protocol;
 using LanguageExt;
 using LanguageExt.TypeClasses;

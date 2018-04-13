@@ -7,9 +7,9 @@ using System.Text;
 namespace Epidemic.Protocol
 {
     [MessagePackObject]
-    public class Node
+    public class NodeMessage
     {
-        public Node(Guid nodeId, Uri address)
+        public NodeMessage(Guid nodeId, Uri address)
         {
             NodeId = nodeId;
             Address = address ?? throw new ArgumentNullException(nameof(address));
