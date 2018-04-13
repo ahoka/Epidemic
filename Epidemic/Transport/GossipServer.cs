@@ -18,11 +18,12 @@ namespace Epidemic
     public class GossipServer : IGossipServer
     {
         private Bootstrap bootstrap;
+        private Task<IChannel> channel;
         private MultithreadEventLoopGroup group;
 
         public string Name { get; }
 
-        public GossipServer(string name, GossipHandler messageHandler)
+        public GossipServer(string name, int port, GossipHandler messageHandler)
         {
             Name = name;
             group = new MultithreadEventLoopGroup();
@@ -47,16 +48,26 @@ namespace Epidemic
                     pipeline.AddLast($"{Name} Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast($"{Name} Message Handler", messageHandler);
                 }));
+
+            channel = bootstrap.BindAsync(IPAddress.Any, port);
         }
 
-        public async Task<IChannel> BindAsync(int port)
+        public Task<IChannel> BindAsync(int port)
         {
-            return await bootstrap.BindAsync(IPAddress.Any, port);
+            return channel;
         }
 
         public void Dispose()
         {
-            group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
+            try
+            {
+                var ch = channel.GetAwaiter().GetResult();
+                ch.DisconnectAsync().GetAwaiter().GetResult();
+            }
+            finally
+            {
+                group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
+            }
         }
     }
 }

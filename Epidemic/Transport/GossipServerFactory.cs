@@ -14,10 +14,10 @@ namespace Epidemic
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public IGossipServer Create(string name)
+        public IGossipServer Create(string name, int port)
         {
             var handler = serviceProvider.GetService<GossipHandler>();
-            return new GossipServer(name, handler);
+            return new GossipServer(name, port, handler);
         }
     }
 }

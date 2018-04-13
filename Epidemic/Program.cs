@@ -47,15 +47,15 @@ namespace Epidemic
                 {
                     var serverFactory = scope.ServiceProvider.GetRequiredService<GossipServerFactory>();
 
-                    using (var server = serverFactory.Create("Server"))
-                    using (var client = serverFactory.Create("Client"))
+                    using (var server = serverFactory.Create("Server", 4011))
+                    using (var client = serverFactory.Create("Client", 4010))
                     {
                         var serverChannel = await server.BindAsync(4010);
 
                         var clientChannel = await client.BindAsync(4011);
                         //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
                         var message = new DefaultAddressedEnvelope<ProtocolMessage>(new PingMessage(Enumerable.Empty<NodeMessage>(), new NodeMessage(Guid.NewGuid(), new Uri("udp://127.0.0.1:4011"))),
-                            new IPEndPoint(IPAddress.Loopback, 4010));
+                            new IPEndPoint(IPAddress.Loopback, 4011));
                         await clientChannel.WriteAndFlushAsync(message);
                         //var message = Encoding.UTF8.GetBytes("HELLO");
                         //var buf = Unpooled.WrappedBuffer(message);
