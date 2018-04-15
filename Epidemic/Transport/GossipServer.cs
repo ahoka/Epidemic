@@ -17,9 +17,9 @@ namespace Epidemic
 {
     public class GossipServer : IGossipServer
     {
-        private Bootstrap bootstrap;
-        private Task<IChannel> channel;
-        private MultithreadEventLoopGroup group;
+        private readonly Bootstrap bootstrap;
+        private readonly Task<IChannel> channel;
+        private readonly MultithreadEventLoopGroup group;
 
         public string Name { get; }
 

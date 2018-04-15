@@ -37,18 +37,20 @@ namespace Epidemic
 
             //services.Scan(scan => scan.FromEntryAssembly().AddClasses().AsSelf().AsImplementedInterfaces());
             services.AddSingleton<GossipServerFactory>();
-            services.AddTransient<GossipHandler>();
-            services.AddTransient<GossipBehavior>();
-            services.AddTransient<Cluster>();
+            services.AddSingleton<GossipHandler>();
+            services.AddSingleton<GossipBehavior>();
+            services.AddSingleton<Cluster>();
 
-            using (var scope = services.BuildServiceProvider().CreateScope())
+            using (var serverProvider = services.BuildServiceProvider())
+            using (var clientProvider = services.BuildServiceProvider())
             {
                 try
                 {
-                    var serverFactory = scope.ServiceProvider.GetRequiredService<GossipServerFactory>();
+                    var serverFactory = serverProvider.GetRequiredService<GossipServerFactory>();
+                    var clientFactory = clientProvider.GetRequiredService<GossipServerFactory>();
 
                     using (var server = serverFactory.Create("Server", 4011))
-                    using (var client = serverFactory.Create("Client", 4010))
+                    using (var client = clientFactory.Create("Client", 4010))
                     {
                         var serverChannel = await server.BindAsync(4010);
 
