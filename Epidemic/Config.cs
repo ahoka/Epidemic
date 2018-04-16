@@ -7,5 +7,6 @@ namespace Epidemic
     public class Config
     {
         public int Port { get; set; }
+        public string Name { get; set; }
     }
 }

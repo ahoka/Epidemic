@@ -17,15 +17,17 @@ namespace Epidemic
 {
     public class GossipServer : IGossipServer
     {
-        private readonly Bootstrap bootstrap;
-        private readonly Task<IChannel> channel;
-        private readonly MultithreadEventLoopGroup group;
+        readonly Bootstrap bootstrap;
+        readonly MultithreadEventLoopGroup group;
+        readonly Config config;
+        Task<IChannel> channel;
 
         public string Name { get; }
 
-        public GossipServer(string name, int port, GossipHandler messageHandler)
+        public GossipServer(Config config, GossipHandler messageHandler)
         {
-            Name = name;
+            this.config = config;
+            Name = config.Name;
             group = new MultithreadEventLoopGroup();
 
             // Protocol:
@@ -49,24 +51,32 @@ namespace Epidemic
                     pipeline.AddLast($"{Name} Message Handler", messageHandler);
                 }));
 
-            channel = bootstrap.BindAsync(IPAddress.Any, port);
         }
 
-        public Task<IChannel> BindAsync(int port)
+        public Task<IChannel> BindAsync()
         {
+            if (channel != null)
+            {
+                throw new InvalidOperationException("The server is already running.");
+            }
+            channel = bootstrap.BindAsync(IPAddress.Any, config.Port);
+
             return channel;
         }
 
-        public void Dispose()
+        public async Task StopAsync()
         {
             try
             {
-                var ch = channel.GetAwaiter().GetResult();
-                ch.DisconnectAsync().GetAwaiter().GetResult();
+                if (channel != null)
+                {
+                    var ch = await channel;
+                    await ch.DisconnectAsync();
+                }
             }
             finally
             {
-                group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
+                await group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             }
         }
     }

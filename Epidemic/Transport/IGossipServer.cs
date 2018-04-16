@@ -4,10 +4,11 @@ using DotNetty.Transport.Channels;
 
 namespace Epidemic
 {
-    public interface IGossipServer : IDisposable
+    public interface IGossipServer
     {
         string Name { get; }
 
-        Task<IChannel> BindAsync(int port);
+        Task<IChannel> BindAsync();
+        Task StopAsync();
     }
 }

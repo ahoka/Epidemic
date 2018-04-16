@@ -9,12 +9,12 @@ namespace Epidemic.State
 {
     public class Cluster
     {
-        public NodeRef Self { get; }
+        //public NodeRef Self { get; }
         public Dictionary<Guid, NodeInfo> Nodes { get; }
 
-        public Cluster(NodeAddress address)
+        public Cluster()
         {
-            Self = new NodeRef(NodeId.NewNodeId(), address);
+            //Self = new NodeRef(NodeId.NewNodeId(), address);
             Nodes = new Dictionary<Guid, NodeInfo>();
         }
 

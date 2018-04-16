@@ -14,6 +14,7 @@ using Epidemic.Behavior;
 using Epidemic.Protocol;
 using Epidemic.State;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
 
@@ -23,58 +24,68 @@ namespace Epidemic
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.WithDemystifiedStackTraces()
                 .WriteTo.Async(l => l.Console())
                 .CreateLogger();
 
-            var services = new ServiceCollection();
-
-            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-            //services.Scan(scan => scan.FromEntryAssembly().AddClasses().AsSelf().AsImplementedInterfaces());
-            services.AddSingleton<GossipServerFactory>();
-            services.AddSingleton<GossipHandler>();
-            services.AddSingleton<GossipBehavior>();
-            services.AddSingleton<Cluster>();
-
-            using (var serverProvider = services.BuildServiceProvider())
-            using (var clientProvider = services.BuildServiceProvider())
-            {
-                try
+            var host = new HostBuilder()
+                .ConfigureServices((context, services) =>
                 {
-                    var serverFactory = serverProvider.GetRequiredService<GossipServerFactory>();
-                    var clientFactory = clientProvider.GetRequiredService<GossipServerFactory>();
+                    services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-                    using (var server = serverFactory.Create("Server", 4011))
-                    using (var client = clientFactory.Create("Client", 4010))
+                    services.AddSingleton<GossipHandler>();
+                    services.AddSingleton<GossipBehavior>();
+                    services.AddSingleton<Cluster>();
+                    services.AddSingleton<IGossipServer, GossipServer>();
+
+                    services.AddScoped<IHostedService, GossipService>();
+
+                    services.AddSingleton(new Config()
                     {
-                        var serverChannel = await server.BindAsync(4010);
-
-                        var clientChannel = await client.BindAsync(4011);
-                        //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
-                        var message = new DefaultAddressedEnvelope<ProtocolMessage>(new PingMessage(Enumerable.Empty<NodeMessage>(), new NodeMessage(Guid.NewGuid(), new Uri("udp://127.0.0.1:4011"))),
-                            new IPEndPoint(IPAddress.Loopback, 4011));
-                        await clientChannel.WriteAndFlushAsync(message);
-                        //var message = Encoding.UTF8.GetBytes("HELLO");
-                        //var buf = Unpooled.WrappedBuffer(message);
-                        //var datagram = new DatagramPacket(buf, new IPEndPoint(IPAddress.Loopback, 4010));
-                        //await channel.WriteAndFlushAsync(datagram);
-
-                        Console.ReadLine();
-                        await clientChannel.DisconnectAsync();
-                        await serverChannel.DisconnectAsync();
-                    }
-                }
-                catch (Exception ex)
+                        Name = "Server",
+                        Port = 4010
+                    });
+                })
+                .ConfigureLogging(logging =>
                 {
-                    Log.Fatal(ex, "Program error");
-                    Log.CloseAndFlush();
-                }
-            }
+                    logging.AddSerilog();
+                });
+
+           await host.RunConsoleAsync();
+
+            //using (var serverProvider = services.BuildServiceProvider())
+            //using (var clientProvider = services.BuildServiceProvider())
+            //{
+            //    try
+            //    {
+            //        using (var server = serverFactory.Create("Server", 4011))
+            //        using (var client = clientFactory.Create("Client", 4010))
+            //        {
+            //            var serverChannel = await server.BindAsync(4010);
+
+            //            var clientChannel = await client.BindAsync(4011);
+            //            //var channel = await client.Connect(new Uri("tcp://127.0.0.1:4010"));
+            //            var message = new DefaultAddressedEnvelope<ProtocolMessage>(new PingMessage(Enumerable.Empty<NodeMessage>(), new NodeMessage(Guid.NewGuid(), new Uri("udp://127.0.0.1:4011"))),
+            //                new IPEndPoint(IPAddress.Loopback, 4011));
+            //            await clientChannel.WriteAndFlushAsync(message);
+            //            //var message = Encoding.UTF8.GetBytes("HELLO");
+            //            //var buf = Unpooled.WrappedBuffer(message);
+            //            //var datagram = new DatagramPacket(buf, new IPEndPoint(IPAddress.Loopback, 4010));
+            //            //await channel.WriteAndFlushAsync(datagram);
+
+            //            Console.ReadLine();
+            //            await clientChannel.DisconnectAsync();
+            //            await serverChannel.DisconnectAsync();
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Log.Fatal(ex, "Program error");
+            //        Log.CloseAndFlush();
+            //    }
+            //}
         }
     }
 }
