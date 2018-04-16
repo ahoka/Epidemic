@@ -30,11 +30,6 @@ namespace Epidemic
             Name = config.Name;
             group = new MultithreadEventLoopGroup();
 
-            // Protocol:
-            // --------------------------------
-            // | len: 2 | messagepack payload |
-            // --------------------------------
-
             bootstrap = new Bootstrap()
                 .Group(group)
                 .Channel<SocketDatagramChannel>()
@@ -43,14 +38,10 @@ namespace Epidemic
                 {
                     var pipeline = channel.Pipeline;
 
-                    //pipeline.AddLast($"{Name} Logger", new SerilogLoggingHandler());
-                    //pipeline.AddLast($"{Name} Frame Decoder", new LengthFieldBasedFrameDecoder(128 * 1024, 0, 4, 0, 4));
-                    //pipeline.AddLast($"{Name} Frame Encoder", new LengthFieldPrepender(2));
                     pipeline.AddLast($"{Name} Payload Decoder", new MessagePackDecoder());
                     pipeline.AddLast($"{Name} Payload Encoder", new MessagePackEncoder());
                     pipeline.AddLast($"{Name} Message Handler", messageHandler);
                 }));
-
         }
 
         public Task<IChannel> BindAsync()
