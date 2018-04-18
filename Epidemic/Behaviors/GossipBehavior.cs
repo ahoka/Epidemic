@@ -1,4 +1,5 @@
-﻿using Epidemic.Protocol;
+﻿using Epidemic.Actors;
+using Epidemic.Protocol;
 using Epidemic.State;
 using LanguageExt;
 using System;
@@ -7,9 +8,9 @@ using System.Linq;
 using System.Text;
 using static LanguageExt.Prelude;
 
-namespace Epidemic.Behavior
+namespace Epidemic.Behaviors
 {
-    public class GossipBehavior
+    public class GossipBehavior : Actor
     {
         private readonly Cluster cluster;
         private readonly NodeMessage nodeId = new NodeMessage(Guid.NewGuid(), new Uri("udp://127.0.0.1:4010"));
@@ -19,6 +20,16 @@ namespace Epidemic.Behavior
         {
             this.cluster = cluster ?? throw new ArgumentNullException(nameof(cluster));
             this.log = log ?? throw new ArgumentNullException(nameof(log));
+
+            Receive = message =>
+            {
+                switch (message)
+                {
+                    case object _:
+                        Sender.Tell("Hello");
+                        break;
+                }
+            };
         }
 
         public static IEnumerable<NodeInfo> Members(Cluster cluster)

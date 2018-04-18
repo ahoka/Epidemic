@@ -6,6 +6,10 @@ namespace Epidemic.Actors
 {
     public interface IActor
     {
-        void OnMessage(object message);
+        Action<object> Receive { get; }
+        void Become(Action<object> behavior);
+
+        ActorRef Sender { get; }
+        ActorRef Self { get; }
     }
 }
